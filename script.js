@@ -152,9 +152,9 @@ const getCountryData = function(country) {
     });
 };
 
-btn.addEventListener('click', function() {
-  getCountryData('georgia');
-});
+// btn.addEventListener('click', function() {
+//   getCountryData('georgia');
+// });
 
 // getCountryData('georgia');
 
@@ -245,42 +245,84 @@ btn.addEventListener('click', function() {
 // );
 // console.log('Getting position...');
 
-// promise based
-const getPosition = function() {
-  return new Promise(function(resolve, reject) {
-    // navigator.geolocation.getCurrentPosition(
-    //   position => resolve(position),
-    //   err => reject(err)
-    // );
-    navigator.geolocation.getCurrentPosition(resolve, reject)
+// // promise based
+// const getPosition = function() {
+//   return new Promise(function(resolve, reject) {
+//     // navigator.geolocation.getCurrentPosition(
+//     //   position => resolve(position),
+//     //   err => reject(err)
+//     // );
+//     navigator.geolocation.getCurrentPosition(resolve, reject)
+//   });
+// };
+//
+// // getPosition().then(pos => console.log(pos));
+//
+//
+// const whereAmI = function(lat, lng) {
+//   getPosition().then(pos => {
+//     const {latitude, longtitude} = pos.coords
+//     return fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longtitude}`);
+//   }).then(res => {
+//       if (!res.ok) throw new Error(`Problem with geocoding ${res.status}`);
+//       return res.json();
+//     })
+//     .then(data => {
+//       console.log(data);
+//       console.log(`You are in ${data.city}, ${data.countryName} `);
+//
+//       return fetch(`https://restcountries.com/v2/name/${data.countryName}`);
+//     })
+//     .then(res => {
+//       if (!res.ok) throw new Error(`Country not found ${res.status}`);
+//       return res.json();
+//     })
+//     .then(data => {
+//       renderCountry(data[0]);
+//     })
+//     .catch(err => console.error(`${err.message} 💥`));
+// };
+//
+// btn.addEventListener('click', whereAmI);
+
+//Challenge #2
+const imagesContainer = document.querySelector('.images');
+
+const wait = function(seconds) {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, seconds * 1000);
   });
 };
 
-// getPosition().then(pos => console.log(pos));
+const createImage = function(imgPath) {
 
+  return new Promise(function(resolve, reject) {
+    const img = document.createElement('img');
+    img.src = imgPath;
 
-const whereAmI = function(lat, lng) {
-  getPosition().then(pos => {
-    const {latitude, longtitude} = pos.coords
-    return fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longtitude}`);
-  }).then(res => {
-      if (!res.ok) throw new Error(`Problem with geocoding ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      console.log(data);
-      console.log(`You are in ${data.city}, ${data.countryName} `);
+    img.addEventListener('load', function() {
+      imagesContainer.append(img);
+      resolve(img);
+    });
 
-      return fetch(`https://restcountries.com/v2/name/${data.countryName}`);
-    })
-    .then(res => {
-      if (!res.ok) throw new Error(`Country not found ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      renderCountry(data[0]);
-    })
-    .catch(err => console.error(`${err.message} 💥`));
+    img.addEventListener('error', function() {
+      reject(new Error('Image not found'));
+    });
+  });
 };
 
-btn.addEventListener('click', whereAmI);
+let currentImage;
+createImage('./img/img-1.jpg')
+  .then(img => {
+    currentImage = img;
+    console.log('Image 1 loaded');
+    return wait(2);
+  }).then(() => {
+  currentImage.style.display = 'none';
+  return createImage('./img/img-2.jpg');
+}).then(img => {
+  currentImage = img;
+  console.log('Image 2 loaded');
+  return wait(2);
+}).then(() => currentImage.style.display = 'none')
+  .catch(err => console.error(err));
